@@ -47,11 +47,11 @@ Fetching data from OSM is a really broad topic on its own, so I will just say I 
 
 The fetching is automated and present in `assets/fetch.ts` script.
 
-### Getting from points on sphere to flat triangles
+### Getting from points on sphere to flat triangles :earth_africa:
 
 With the data downloaded, we are definitely one huge step closer to having the map, but it is not immediately clear what to do next.
 
-We should notice that the data we've just downloaded is based on points using _longitude_ and _latitude_ coordinates. To take it from sphere :earth_africa: to a flat surface (like our map), we use [web mercator projection](https://tchayen.github.io/web-mercator-projection).
+We should notice that the data we've just downloaded is based on points using _longitude_ and _latitude_ coordinates. To take it from sphere :globe_with_meridians: to a flat surface :pencil: (like our map), we use [web mercator projection](https://tchayen.github.io/web-mercator-projection).
 
 Now that we have abstract points in 2D space, we need to render them using the GPU. The current problem is that we have shapes defined as polygons or lines, which are sequences of points. We need triangles :small_red_triangle:. For that we use [Ear clipping method :ear: :scissors:](https://en.wikipedia.org/wiki/Polygon_triangulation) for simple triangulation (and even simpler algorithm for replacing lines with chain of rectangles of given width).
 
@@ -65,7 +65,7 @@ After overcoming those difficulties we get our map rendered on screen :tada:.
 
 ## What else is left to do
 
-### Tiling
+### Tiling :cloud:
 
 If we wanted to have a bigger map we will definitely need to implement tiling. This involves having a custom format for the data that comes in that you render and then writing a server capable of serving that.
 
@@ -73,13 +73,13 @@ If we wanted to have a bigger map we will definitely need to implement tiling. T
 
 If you zoom in, you will notice that roads have characteristic jagged edges. Fixing it is not as easy as it might seem. Choosing other algorithm for triangulating lines won't help much since those are often separate objects (called _features_) in the GeoJSON format. They would have to be connected first and only after that enhanced to look better.
 
-### Labels
+### Labels :label:
 
 Having labels on the map is very complicated issue. First thing is having text at all. Since we went with custom WebGL renderer, there is no HTML DOM to save us (or maybe there is, but then you'd have correlate it with map orientation and make sure it renders smooth without lagging behind the map). So we've got to implement text rendering. This is so complicated issue on its own that it has [several competing solutions](https://stackoverflow.com/questions/25956272/better-quality-text-in-webgl) and none of them is perfect.
 
 With the first problem solved you only enter a collection of even bigger and not obvious problems which is how, when and where render those labels. It depends on so many factors it is hard to decide where to start. You have to display different kind of labels depending on the zoom. You don't want to display city label when user has already zoomed in so much it covers their whole screen. You can only fit several on the screen and have to pick those most important or relevant (you've probably noticed that some time ago Google started to show different labels depending on the context; it was possible thanks to the WebGL dynamic renderer).
 
-### Buildings
+### Buildings :house_with_garden:
 
 You can take buildings data from OpenStreetMap and render it as is, but it might not be the best idea. OSM tries to picture reality as closely as it can. It seems to be what we want, but actually it's not true. First of all, we want to have _pretty_ maps that users want to watch. If there is too much going on somewhere on the screen, it is our fault we didn't clear the data before showing it to the user. And that is definitely the case here.
 

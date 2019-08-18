@@ -18,24 +18,25 @@ const lookForBoundaries = (x: number, y: number) => {
   if (y > maxY) maxY = y;
 };
 
-// export const colors: Dict<Color> = {
-//   water: [0.098, 0.098, 0.102],
-//   background: [0.204, 0.2, 0.196],
-//   primaryRoads: [0.78, 0.78, 0.78],
-//   secondaryRoads: [0.569, 0.569, 0.569],
-//   tertiaryRoads: [0.27, 0.27, 0.27],
-//   other: [0.173, 0.173, 0.169],
-// };
-
 export const colors: Dict<Color> = {
-  water: [0.666, 0.855, 1],
-  background: [0.929, 0.925, 0.921],
-  primaryRoads: [1, 1, 1], // primaryRoads: [1, 0.949, 0.686],
-  secondaryRoads: [1, 1, 1],
-  tertiaryRoads: [1, 1, 1],
-  greens: [0.753, 0.925, 0.682],
-  other: [1, 1, 1],
+  water: [0.098, 0.098, 0.102],
+  background: [0.204, 0.2, 0.196],
+  primaryRoads: [0.78, 0.78, 0.78],
+  secondaryRoads: [0.569, 0.569, 0.569],
+  tertiaryRoads: [0.27, 0.27, 0.27],
+  greens: [0.27, 0.27, 0.27],
+  other: [0.173, 0.173, 0.169],
 };
+
+// export const colors: Dict<Color> = {
+//   water: [0.666, 0.855, 1],
+//   background: [0.929, 0.925, 0.921],
+//   primaryRoads: [1, 1, 1], // primaryRoads: [1, 0.949, 0.686],
+//   secondaryRoads: [1, 1, 1],
+//   tertiaryRoads: [1, 1, 1],
+//   greens: [0.753, 0.925, 0.682],
+//   other: [1, 1, 1],
+// };
 
 export const objects: Array<Object> = [
   {

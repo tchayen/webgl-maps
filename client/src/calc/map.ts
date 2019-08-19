@@ -48,13 +48,6 @@ export default () => {
   div.innerHTML = '© OpenStreetMap contributors';
   document.body.appendChild(div);
 
-  const fetchData = async () => {
-    const url = 'http://localhost:4000/api';
-    const data = await fetch(url);
-    const json = data.json();
-    return json;
-  };
-
   const setup = (
     gl: WebGLRenderingContext,
     program: WebGLShader,
@@ -98,11 +91,6 @@ export default () => {
     };
   };
 
-  const fetchLoop = () => {
-    fetchData();
-    setTimeout(fetchLoop, 4000);
-  };
-
   const draw = (
     gl: WebGLRenderingContext,
     program: WebGLShader,
@@ -143,7 +131,6 @@ export default () => {
     throw new Error('Failed to setup GL context');
   }
 
-  gl.getExtension('OES_standard_derivatives');
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertex);
   const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragment);
   const program = createProgram(gl, vertexShader, fragmentShader);
@@ -152,6 +139,5 @@ export default () => {
 
   setupSlippyMap(render, 5, [-200, 50]);
   bindListeners();
-  fetchLoop();
   render();
 };

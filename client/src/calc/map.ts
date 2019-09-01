@@ -1,4 +1,4 @@
-import { setUpCanvas, createShader, createProgram, resize } from '../webgl';
+import { setUpCanvas, createShader, createProgram, resize } from './webgl';
 import { multiply, projection, translation, scaling } from './maths';
 import { zoom, offset, bindListeners, setupSlippyMap } from './slippyMap';
 import { objects, colors } from './prepare';

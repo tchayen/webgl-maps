@@ -122,14 +122,9 @@ const fetch = (query: string): Promise<string> =>
     request.end();
   });
 
-const randomString = () =>
-  Math.random()
-    .toString(36)
-    .substring(7);
-
 const run = async () => {
   const [_node, _file, userPath] = process.argv;
-  const path = userPath || `${randomString()}.json`;
+  const path = userPath || `../out/map.json`;
   const query = prepareQuery();
   const data = await fetch(query);
   const osm = JSON.parse(data);

@@ -32,9 +32,6 @@ const saveFile = (fileName: string, data: string) =>
 
 const generateSpacing = (ttfFile: Ttf) => {
   const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const charToGlyphIndex = (char: string) =>
-    ttfFile.glyphIndexMap[char.codePointAt(0) || 0] || 0;
-
   const map: Dictionary<Glyph> = {};
   alphabet.split('').forEach(char => {
     const index = ttfFile.glyphIndexMap[char.codePointAt(0) || 0] || 0;
@@ -53,7 +50,7 @@ const generateSpacing = (ttfFile: Ttf) => {
   return map;
 };
 
-(async () => {
+const run = async () => {
   const [_node, _file, type, input, output] = process.argv;
 
   if (input === '' || output === '') {
@@ -69,5 +66,9 @@ const generateSpacing = (ttfFile: Ttf) => {
   } else if (type === 'spacing') {
     const spacingFile = generateSpacing(ttfFile);
     await saveFile(output, JSON.stringify(spacingFile));
+  } else {
+    throw new Error('Unrecognized action');
   }
-})();
+};
+
+run();

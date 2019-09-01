@@ -345,9 +345,9 @@ export const normalize = (v: Vector) => {
 };
 
 export const lookAt = (cameraPosition: Vector, target: Vector, up: Vector) => {
-  var zAxis = normalize(subtractVectors(cameraPosition, target));
-  var xAxis = cross(up, zAxis);
-  var yAxis = cross(zAxis, xAxis);
+  const zAxis = normalize(subtractVectors(cameraPosition, target));
+  const xAxis = cross(up, zAxis);
+  const yAxis = cross(zAxis, xAxis);
   return [
     xAxis[0],
     xAxis[1],

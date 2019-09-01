@@ -3,6 +3,7 @@
   "workspaces": [
     "assets",
     "client",
-    "server"
+    "server",
+    "ttf"
   ]
 }

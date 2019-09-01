@@ -101,7 +101,7 @@ const generateTexture = (config: Config) => {
   const gridOuter = new Float64Array(w * h);
   const gridInner = new Float64Array(w * h);
 
-  for (var i = 0; i < w * h; i++) {
+  for (let i = 0; i < w * h; i++) {
     const a = imageData.data[i * 4 + 3] / 255; // Alpha value.
     gridOuter[i] =
       a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
@@ -117,8 +117,8 @@ const generateTexture = (config: Config) => {
   edt(gridOuter, w, h, f, v, z);
   edt(gridInner, w, h, f, v, z);
 
-  for (i = 0; i < w * h; i++) {
-    var d = Math.sqrt(gridOuter[i]) - Math.sqrt(gridInner[i]);
+  for (let i = 0; i < w * h; i++) {
+    const d = Math.sqrt(gridOuter[i]) - Math.sqrt(gridInner[i]);
     alphaChannel[i] = Math.round(255 - 255 * (d / radius + cutoff));
   }
 

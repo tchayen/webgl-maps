@@ -42,8 +42,12 @@ const edt = (
   v: Uint16Array,
   z: Float64Array,
 ) => {
-  for (var x = 0; x < width; x++) edt1d(data, x, width, height, f, v, z);
-  for (var y = 0; y < height; y++) edt1d(data, y * width, 1, width, f, v, z);
+  for (let x = 0; x < width; x++) {
+    edt1d(data, x, width, height, f, v, z);
+  }
+  for (let y = 0; y < height; y++) {
+    edt1d(data, y * width, 1, width, f, v, z);
+  }
 };
 
 export default edt;

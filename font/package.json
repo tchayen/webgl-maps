@@ -3,10 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
+    "@types/webpack": "^4.39.1",
+    "ts-loader": "^6.0.4",
     "ts-node": "^8.3.0",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.7"
   },
   "scripts": {
-    "start": "tsc index.ts"
+    "start": "webpack"
   }
 }

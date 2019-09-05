@@ -3,6 +3,9 @@ import ttf from './ttf';
 import binaryFile from './binaryFile';
 import { Ttf, Dictionary, Glyph } from './types';
 
+const alphabet =
+  ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+
 const readFile = (fileName: string): Promise<Buffer> =>
   new Promise((resolve, reject) => {
     fs.readFile(fileName, (error, data) => {
@@ -31,7 +34,6 @@ const saveFile = (fileName: string, data: string) =>
   });
 
 const generateSpacing = (ttfFile: Ttf) => {
-  const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const map: Dictionary<Glyph> = {};
   alphabet.split('').forEach(char => {
     const index = ttfFile.glyphIndexMap[char.codePointAt(0) || 0] || 0;

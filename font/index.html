@@ -8,9 +8,23 @@
     html {
       font-family: 'Inter', sans-serif;
     }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    p {
+      margin: 0 0 20px 0;
+    }
   </style>
   <body>
-    Inter
+    <p>
+      Browser won't load font file if no text is displayed in it (this one will
+      do).
+    </p>
     <script src="./dist/bundle.js"></script>
   </body>
 </html>

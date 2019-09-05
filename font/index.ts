@@ -1,6 +1,9 @@
-import font from '../out/font.json';
+import font from '../out/spacing.json';
 import edt from './edt';
 import pack from './pack';
+
+const alphabet =
+  '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
 
 const INF = 1e20;
 
@@ -29,8 +32,6 @@ type Config = {
 };
 
 const generateTexture = (config: Config) => {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-
   const { font, fontSize, unitsPerEm } = config;
 
   const buffer = fontSize / 8;
@@ -41,17 +42,16 @@ const generateTexture = (config: Config) => {
 
   const transform = (x: number) => Math.ceil(x * scale);
 
-  const { width, height, sizes } = pack(
-    alphabet.split('').map(letter => {
-      const { width, height } = (font as any)[letter];
+  const boxes = alphabet.split('').map(letter => {
+    const { width, height } = (font as any)[letter];
+    return {
+      letter,
+      width: transform(width) + buffer * 2,
+      height: transform(height) + buffer * 2,
+    };
+  });
 
-      return {
-        letter,
-        width: transform(width) + buffer * 2,
-        height: transform(height) + buffer * 2,
-      };
-    }),
-  );
+  const { width, height, sizes } = pack(boxes);
 
   const pixelRatio = window.devicePixelRatio;
 
@@ -149,9 +149,9 @@ const run = async () => {
     unitsPerEm: 2816,
   };
 
-  const texture = generateTexture(config);
+  const { width, height, metadata } = generateTexture(config);
 
-  console.log(texture);
+  console.log(JSON.stringify({ width, height, metadata }));
 };
 
 run();

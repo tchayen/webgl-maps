@@ -1,13 +1,5 @@
 import { setUpCanvas, createShader, createProgram, resize } from './webgl';
-import {
-  multiply,
-  projection,
-  translation,
-  scaling,
-  yRotation,
-  zRotation,
-  xRotation,
-} from './maths';
+import { multiply, projection, translation, scaling } from './maths';
 import { zoom, offset, bindListeners, setupSlippyMap } from './slippyMap';
 import { objects, colors } from './prepare';
 import { Dict, Color, Object } from '../types';
@@ -168,8 +160,7 @@ export default async () => {
     gl.uniformMatrix4fv(
       textSetup.matrixUniform,
       false,
-      // multiply(yRotation(Math.PI), zRotation(Math.PI), matrix),
-      matrix,
+      multiply(p, v, translation(760, -30, 0)),
     );
     gl.uniform4fv(textSetup.colorUniform, [0, 0, 0, 1]);
     gl.uniform1f(textSetup.bufferUniform, 0.75);
@@ -189,7 +180,7 @@ export default async () => {
   const program = createProgram(gl, vertexShader, fragmentShader);
   const scene = setup(gl, program, objects, colors);
   const textSetup = setupTextRendering(gl);
-  const textBuffers = await loadBuffers(gl, 'dupa!@#');
+  const textBuffers = await loadBuffers(gl, 'Cracow');
   console.log(textSetup, textBuffers);
   const render = () => draw(gl, program, scene, textSetup, textBuffers);
 

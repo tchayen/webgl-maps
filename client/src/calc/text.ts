@@ -4,7 +4,7 @@ import { createShader, createProgram, resize } from './webgl';
 import { projection } from './maths';
 
 const pixelRatio = window.devicePixelRatio;
-const fontSize = 64;
+const fontSize = 24;
 const unitsPerEm = 2816;
 const scale = (1 / unitsPerEm) * fontSize;
 const buffer = fontSize / 8;

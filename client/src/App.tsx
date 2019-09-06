@@ -3,7 +3,7 @@ import text from './calc/text';
 
 const App = () => {
   map();
-  text('dupa123!');
+  text('test!@#');
   return null;
 };
 

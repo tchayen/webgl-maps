@@ -3,9 +3,10 @@ import spacing from './spacing.json';
 import { createShader, createProgram, resize } from './webgl';
 import { projection } from './maths';
 
-const fontSize = 16;
+const fontSize = 64;
 const unitsPerEm = 2816;
 const scale = (1 / unitsPerEm) * fontSize;
+const buffer = fontSize / 8;
 
 const loadImage = (source: string): Promise<HTMLImageElement> =>
   new Promise(resolve => {
@@ -36,9 +37,9 @@ const boundingBoxToTriangles = (
   y,
 ];
 
-const drawText = async (text: string) => {
-  const buffer = fontSize / 8;
+const setupTextRendering = () => {};
 
+const drawText = async (text: string) => {
   const vertex = `
     attribute vec4 a_position;
     attribute vec2 a_texcoord;
@@ -199,7 +200,7 @@ const drawText = async (text: string) => {
   const g = (2 * 1.4142) / sc;
 
   gl.uniformMatrix4fv(matrixUniform, false, projectionMatrix);
-  gl.uniform4fv(colorUniform, [1, 1, 1, 1]);
+  gl.uniform4fv(colorUniform, [0, 0, 0, 1]);
   gl.uniform1f(bufferUniform, 0.75);
   gl.uniform1f(gammaUniform, g);
 

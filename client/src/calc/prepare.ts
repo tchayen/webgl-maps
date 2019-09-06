@@ -19,13 +19,13 @@ const lookForBoundaries = (x: number, y: number) => {
 };
 
 export const colors: Dict<Color> = {
-  water: [0.098, 0.098, 0.102],
-  background: [0.204, 0.2, 0.196],
-  primaryRoads: [0.78, 0.78, 0.78],
-  secondaryRoads: [0.569, 0.569, 0.569],
-  tertiaryRoads: [0.27, 0.27, 0.27],
-  greens: [0.27, 0.27, 0.27],
-  other: [0.173, 0.173, 0.169],
+  water: [0, 0, 0],
+  background: [0.6, 0.6, 0.6],
+  primaryRoads: [1, 1, 1],
+  secondaryRoads: [0.9, 0.9, 0.9],
+  tertiaryRoads: [0.7, 0.7, 0.7],
+  greens: [0.7, 0.7, 0.7],
+  other: [0.6, 0, 0.6],
 };
 
 // export const colors: Dict<Color> = {

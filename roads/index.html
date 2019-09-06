@@ -1,0 +1,116 @@
+<html>
+  <head>
+    <title>test</title>
+    <style>
+      body {
+        margin: 0;
+        background-color: #eee;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="./osm.js"></script>
+    <script>
+      const width = 1500;
+      const height = 1500;
+      const pixelRatio = window.devicePixelRatio;
+
+      const canvas = document.createElement('canvas');
+      canvas.setAttribute('style', `width:${width}px;height:${height}px`);
+      canvas.width = width * pixelRatio;
+      canvas.height = height * pixelRatio;
+      document.body.appendChild(canvas);
+
+      const context = canvas.getContext('2d');
+      if (context === null) {
+        throw new Error('Failed to setup context');
+      }
+
+      context.scale(pixelRatio, pixelRatio);
+      context.transform(1, 0, 0, -1, 0, height);
+
+      context.fillStyle = 'rgba(0, 0, 0, 1)';
+      context.fillRect(0, 0, width, height);
+      context.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      context.lineWidth = 3;
+
+      const RADIUS = 6378137.0;
+      const degreesToMeters = (lat, lng) => ({
+        x: (RADIUS * lng * Math.PI) / 180.0,
+        y: RADIUS * Math.atanh(Math.sin((lat * Math.PI) / 180.0)),
+      });
+
+      const nodes = {};
+      const ways = {};
+      osm.elements
+        .filter(element => element.type === 'node')
+        .forEach(({ id, lat, lon }) => (nodes[id] = degreesToMeters(lat, lon)));
+
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = 0;
+      let maxY = 0;
+      Object.entries(nodes).forEach(([id, node]) => {
+        if (node.x < minX) minX = node.x;
+        if (node.y < minY) minY = node.y;
+        if (node.x > maxX) maxX = node.x;
+        if (node.y > maxY) maxY = node.y;
+      });
+
+      const rangeX = maxX - minX;
+      const rangeY = maxY - minY;
+
+      Object.entries(nodes).forEach(([id, node]) => {
+        node.x = ((node.x - minX) / rangeX) * width;
+        node.y = ((node.y - minY) / rangeY) * height;
+      });
+
+      osm.elements
+        .filter(element => element.type === 'way')
+        .forEach(way => (ways[way.id] = way.nodes));
+
+      const colors = [
+        '#ff4040',
+        '#e6acac',
+        '#e54500',
+        '#e59573',
+        '#ff9900',
+        '#b28a2d',
+        '#f2e0b6',
+        '#cfe600',
+        '#cef2b6',
+        '#66ff40',
+        '#00ff99',
+        '#b6f2e0',
+        '#00e6cf',
+        '#3dbcf2',
+        '#0082d9',
+        '#7e73e6',
+        '#2600bf',
+        '#cc00ff',
+        '#e6b6f2',
+        '#ff80ff',
+        '#b3007d',
+        '#e5396d',
+      ];
+
+      Object.values(ways).forEach((way, i) => {
+        const points = way.map(id => nodes[id]);
+        context.strokeStyle = colors[i % colors.length];
+        context.beginPath();
+        context.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+          context.lineTo(points[i].x, points[i].y);
+        }
+        context.stroke();
+      });
+
+      Object.values(nodes).forEach(node => {
+        context.fillRect(node.x - 2, node.y - 2, 5, 5);
+      });
+    </script>
+  </body>
+</html>

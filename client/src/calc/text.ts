@@ -3,6 +3,7 @@ import spacing from './spacing.json';
 import { createShader, createProgram, resize } from './webgl';
 import { projection } from './maths';
 
+const pixelRatio = window.devicePixelRatio;
 const fontSize = 64;
 const unitsPerEm = 2816;
 const scale = (1 / unitsPerEm) * fontSize;
@@ -37,9 +38,7 @@ const boundingBoxToTriangles = (
   y,
 ];
 
-const setupTextRendering = () => {};
-
-const drawText = async (text: string) => {
+export const setupTextRendering = (gl: WebGLRenderingContext) => {
   const vertex = `
     attribute vec4 a_position;
     attribute vec2 a_texcoord;
@@ -70,31 +69,9 @@ const drawText = async (text: string) => {
     }
   `;
 
-  const width = 300;
-  const height = 64;
-  const pixelRatio = window.devicePixelRatio;
-
-  const canvas = document.createElement('canvas');
-  canvas.setAttribute(
-    'style',
-    `width:${width}px;height:${height}px;position:absolute;top:100px;left:100px;`,
-  );
-  canvas.width = width * pixelRatio;
-  canvas.height = height * pixelRatio;
-  document.body.appendChild(canvas);
-
-  const gl = canvas.getContext('webgl');
-  if (gl === null) {
-    throw new Error('Failed to setup GL context');
-  }
-
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertex);
   const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragment);
   const program = createProgram(gl, vertexShader, fragmentShader);
-
-  gl.clearColor(0, 0, 0, 0);
-  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
-  gl.enable(gl.BLEND);
 
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const texcoordLocation = gl.getAttribLocation(program, 'a_texcoord');
@@ -113,12 +90,18 @@ const drawText = async (text: string) => {
     throw new Error('Failed to create uniform');
   }
 
-  const positionBuffer = gl.createBuffer();
+  return {
+    program,
+    positionLocation,
+    texcoordLocation,
+    colorUniform,
+    matrixUniform,
+    bufferUniform,
+    gammaUniform,
+  };
+};
 
-  if (positionBuffer === null) {
-    throw new Error('Failed to created buffer');
-  }
-
+const prepareStringTriangles = (text: string) => {
   const vertices = [];
 
   let positionX = 0;
@@ -131,16 +114,7 @@ const drawText = async (text: string) => {
       height * scale + buffer * 2,
     );
     vertices.push(...shape);
-    console.log(shape, (spacing as any)[text[i]]);
     positionX += ((i !== 0 ? lsb : 0) + width + rsb) * scale;
-  }
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
-  const textureBuffer = gl.createBuffer();
-  if (textureBuffer === null) {
-    throw new Error('Failed to created buffer');
   }
 
   const uvs = [];
@@ -156,6 +130,26 @@ const drawText = async (text: string) => {
       (height * pixelRatio) / maxHeight,
     );
     uvs.push(...shape);
+  }
+
+  return { vertices, uvs };
+};
+
+export const loadBuffers = async (gl: WebGLRenderingContext, text: string) => {
+  const { vertices, uvs } = prepareStringTriangles(text);
+
+  const positionBuffer = gl.createBuffer();
+
+  if (positionBuffer === null) {
+    throw new Error('Failed to created buffer');
+  }
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+  const textureBuffer = gl.createBuffer();
+  if (textureBuffer === null) {
+    throw new Error('Failed to created buffer');
   }
 
   gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
@@ -181,7 +175,52 @@ const drawText = async (text: string) => {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
+  return {
+    positionBuffer,
+    textureBuffer,
+    vertices,
+  };
+};
+
+const drawText = async (text: string) => {
+  const width = 300;
+  const height = 64;
+  const pixelRatio = window.devicePixelRatio;
+
+  const canvas = document.createElement('canvas');
+  canvas.setAttribute(
+    'style',
+    `width:${width}px;height:${height}px;position:absolute;top:100px;left:100px;`,
+  );
+  canvas.width = width * pixelRatio;
+  canvas.height = height * pixelRatio;
+  document.body.appendChild(canvas);
+
+  const gl = canvas.getContext('webgl');
+  if (gl === null) {
+    throw new Error('Failed to setup GL context');
+  }
+
+  gl.clearColor(0, 0, 0, 0);
+  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
+  gl.enable(gl.BLEND);
+
+  const { positionBuffer, textureBuffer, vertices } = await loadBuffers(
+    gl,
+    text,
+  );
+
   const projectionMatrix = projection(width, height, 1);
+
+  const {
+    program,
+    positionLocation,
+    texcoordLocation,
+    matrixUniform,
+    colorUniform,
+    bufferUniform,
+    gammaUniform,
+  } = setupTextRendering(gl);
 
   resize(gl);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);

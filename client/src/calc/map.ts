@@ -1,8 +1,17 @@
 import { setUpCanvas, createShader, createProgram, resize } from './webgl';
-import { multiply, projection, translation, scaling } from './maths';
+import {
+  multiply,
+  projection,
+  translation,
+  scaling,
+  yRotation,
+  zRotation,
+  xRotation,
+} from './maths';
 import { zoom, offset, bindListeners, setupSlippyMap } from './slippyMap';
 import { objects, colors } from './prepare';
 import { Dict, Color, Object } from '../types';
+import { setupTextRendering, loadBuffers } from './text';
 
 type Buffer = {
   size: number;
@@ -36,7 +45,7 @@ const fragment = `
   }
 `;
 
-export default () => {
+export default async () => {
   if (typeof window === 'undefined') return;
   document.documentElement.style.overflow = 'hidden';
   document.body.style.cursor = 'grab';
@@ -95,14 +104,19 @@ export default () => {
     gl: WebGLRenderingContext,
     program: WebGLShader,
     scene: Scene,
+    textSetup: any,
+    textBuffers: any,
   ) => {
     resize(gl);
-    const density = window.devicePixelRatio;
-    const width = gl.canvas.width / density;
-    const height = gl.canvas.height / density;
+    const pixelRatio = window.devicePixelRatio;
+    const width = gl.canvas.width / pixelRatio;
+    const height = gl.canvas.height / pixelRatio;
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
+    gl.enable(gl.BLEND);
+
     gl.useProgram(program);
 
     const pX = width * Math.pow(1.01, zoom);
@@ -123,6 +137,45 @@ export default () => {
 
       gl.drawArrays(gl.TRIANGLES, 0, scene.buffers[i].size / 2);
     }
+
+    gl.useProgram(textSetup.program);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, textBuffers.positionBuffer);
+    gl.enableVertexAttribArray(textSetup.positionLocation);
+    gl.vertexAttribPointer(
+      textSetup.positionLocation,
+      2,
+      gl.FLOAT,
+      false,
+      0,
+      0,
+    );
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, textBuffers.textureBuffer);
+    gl.enableVertexAttribArray(textSetup.texcoordLocation);
+    gl.vertexAttribPointer(
+      textSetup.texcoordLocation,
+      2,
+      gl.FLOAT,
+      false,
+      0,
+      0,
+    );
+
+    const sc = 64 * pixelRatio;
+    const g = (2 * 1.4142) / sc;
+
+    gl.uniformMatrix4fv(
+      textSetup.matrixUniform,
+      false,
+      // multiply(yRotation(Math.PI), zRotation(Math.PI), matrix),
+      matrix,
+    );
+    gl.uniform4fv(textSetup.colorUniform, [0, 0, 0, 1]);
+    gl.uniform1f(textSetup.bufferUniform, 0.75);
+    gl.uniform1f(textSetup.gammaUniform, g);
+
+    gl.drawArrays(gl.TRIANGLES, 0, textBuffers.vertices.length / 2);
   };
 
   const canvas = setUpCanvas();
@@ -135,7 +188,10 @@ export default () => {
   const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragment);
   const program = createProgram(gl, vertexShader, fragmentShader);
   const scene = setup(gl, program, objects, colors);
-  const render = () => draw(gl, program, scene);
+  const textSetup = setupTextRendering(gl);
+  const textBuffers = await loadBuffers(gl, 'dupa!@#');
+  console.log(textSetup, textBuffers);
+  const render = () => draw(gl, program, scene, textSetup, textBuffers);
 
   setupSlippyMap(render, 5, [-200, 50]);
   bindListeners();

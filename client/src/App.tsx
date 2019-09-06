@@ -3,7 +3,7 @@ import text from './calc/text';
 
 const App = () => {
   map();
-  text('test!@#');
+  // text('test!@#');
   return null;
 };
 

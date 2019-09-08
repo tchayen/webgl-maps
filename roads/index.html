@@ -1,6 +1,7 @@
 <html>
   <head>
     <title>test</title>
+    <meta charset="UTF-8" />
     <style>
       body {
         margin: 0;
@@ -111,6 +112,20 @@
       Object.values(nodes).forEach(node => {
         context.fillRect(node.x - 2, node.y - 2, 5, 5);
       });
+
+      const mapping = {};
+      Object.entries(ways).forEach(([id, way]) => {
+        mapping[way[0]] = id;
+        mapping[way[way.length - 1]] = id;
+      });
+
+      const connections = Object.values(ways).map(way => ({
+        data: way,
+        previous: mapping[way[0]],
+        next: mapping[way[way.length - 1]],
+      }));
+
+      console.log(mapping, connections);
     </script>
   </body>
 </html>

@@ -154,17 +154,15 @@ export default async () => {
       0,
     );
 
-    const sc = 64 * pixelRatio;
-    const g = (2 * 1.4142) / sc;
-
     gl.uniformMatrix4fv(
       textSetup.matrixUniform,
       false,
-      multiply(p, v, translation(760, -30, 0)),
+      // multiply(p, v, translation(760, -30, 0)),
+      multiply(p, v, translation(0, -30, 0)),
     );
     gl.uniform4fv(textSetup.colorUniform, [0, 0, 0, 1]);
-    gl.uniform1f(textSetup.bufferUniform, 0.75);
-    gl.uniform1f(textSetup.gammaUniform, g);
+    gl.uniform1f(textSetup.bufferUniform, 0.9);
+    gl.uniform1f(textSetup.gammaUniform, 0.25);
 
     gl.drawArrays(gl.TRIANGLES, 0, textBuffers.vertices.length / 2);
   };
@@ -180,7 +178,7 @@ export default async () => {
   const program = createProgram(gl, vertexShader, fragmentShader);
   const scene = setup(gl, program, objects, colors);
   const textSetup = setupTextRendering(gl);
-  const textBuffers = await loadBuffers(gl, 'Cracow');
+  const textBuffers = await loadBuffers(gl, 'ą ćęłóńżźĄĆĘŁÓŃŻŹ');
   console.log(textSetup, textBuffers);
   const render = () => draw(gl, program, scene, textSetup, textBuffers);
 

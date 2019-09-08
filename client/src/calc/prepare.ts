@@ -19,12 +19,12 @@ const lookForBoundaries = (x: number, y: number) => {
 };
 
 export const colors: Dict<Color> = {
-  water: [0, 0, 0],
-  background: [0.6, 0.6, 0.6],
-  primaryRoads: [1, 1, 1],
-  secondaryRoads: [0.9, 0.9, 0.9],
-  tertiaryRoads: [0.7, 0.7, 0.7],
-  greens: [0.7, 0.7, 0.7],
+  water: [0.7, 0.7, 0.7],
+  background: [1, 1, 1],
+  primaryRoads: [0, 0, 0],
+  secondaryRoads: [0, 0, 0],
+  tertiaryRoads: [0, 0, 0],
+  greens: [1, 1, 1],
   other: [0.6, 0, 0.6],
 };
 
@@ -52,7 +52,7 @@ export const objects: Array<Object> = [
     shapes: [],
     vertices: [],
     color: colors.primaryRoads,
-    width: 2,
+    width: 1.5,
     type: 'lines',
   },
   {
@@ -68,7 +68,7 @@ export const objects: Array<Object> = [
     shapes: [],
     vertices: [],
     color: colors.secondaryRoads,
-    width: 1.5,
+    width: 1,
     type: 'lines',
   },
   {
@@ -84,7 +84,7 @@ export const objects: Array<Object> = [
     shapes: [],
     vertices: [],
     color: colors.tertiaryRoads,
-    width: 1,
+    width: 0.5,
     type: 'lines',
   },
   {
@@ -141,28 +141,34 @@ const processPolygon = (polygon: Array<Point>): Array<Point> =>
     .map(p => [p[0] / factor, p[1] / factor]);
 
 objects.forEach(object => {
-  const shapes = object.shapes.map(processPolygon).map((polygon, i) => {
-    let triangulated = null;
-    try {
-      if (object.type === 'lines') {
-        triangulated = normal(polygon, object.width);
-      } else {
-        const flat = polygon.flat();
-        const node = linkedList(flat);
-        if (node === undefined) {
-          throw new Error('Failed to triangulate shape');
+  const shapes = object.shapes
+    .map(processPolygon)
+    .map((polygon, i) => {
+      let triangulated = null;
+      try {
+        if (object.type === 'lines') {
+          triangulated = normal(polygon, object.width);
+        } else {
+          const flat = polygon.flat();
+          const node = linkedList(flat);
+          if (node === undefined) {
+            throw new Error('Failed to triangulate shape');
+          }
+          const triangles = earCut(node);
+          const vertices = triangles.flatMap(i => [
+            flat[2 * i],
+            flat[2 * i + 1],
+          ]);
+          triangulated = vertices;
         }
-        const triangles = earCut(node);
-        const vertices = triangles.flatMap(i => [flat[2 * i], flat[2 * i + 1]]);
-        triangulated = vertices;
+      } catch (_) {
+        const error = JSON.stringify(object.vertices);
+        console.log(`Polygon ${i} was problematic. Snapshot: ${error}`);
+      } finally {
+        return triangulated;
       }
-    } catch (_) {
-      const error = JSON.stringify(object.vertices);
-      console.log(`Polygon ${i} was problematic. Snapshot: ${error}`);
-    } finally {
-      return triangulated;
-    }
-  });
+    })
+    .filter(Boolean);
 
   // Join everything together for rendering (because it's just triangles,
   // as long as we use the same set of shaders, it can be one big blob

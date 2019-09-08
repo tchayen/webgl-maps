@@ -208,7 +208,6 @@ const parseFormat4 = (reader: BinaryFile): ParseFormat4Output => {
 
 type ReadCmapTableOutput = Cmap & { glyphIndexMap: Mapping<number> };
 
-// https://docs.microsoft.com/en-us/typography/opentype/spec/cmap
 const readCmapTable = (
   reader: BinaryFile,
   offset: number,

@@ -1,13 +1,12 @@
 import font from './font.json';
 import spacing from './spacing.json';
-import { createShader, createProgram, resize } from './webgl';
-import { projection } from './maths';
+import { createShader, createProgram } from './webgl';
 
 const pixelRatio = window.devicePixelRatio;
 const fontSize = 24;
 const unitsPerEm = 2816;
 const scale = (1 / unitsPerEm) * fontSize;
-const buffer = fontSize / 8;
+const buffer = 5;
 
 const loadImage = (source: string): Promise<HTMLImageElement> =>
   new Promise(resolve => {
@@ -63,8 +62,8 @@ export const setupTextRendering = (gl: WebGLRenderingContext) => {
     uniform sampler2D u_texture;
 
     void main() {
-      float dist = texture2D(u_texture, v_texcoord).r;
-      float alpha = smoothstep(u_buffer - u_gamma, u_buffer + u_gamma, dist);
+      float distance = texture2D(u_texture, v_texcoord).r;
+      float alpha = smoothstep(u_buffer - u_gamma, u_buffer + u_gamma, distance);
       gl_FragColor = vec4(u_color.rgb, alpha * u_color.a);
     }
   `;
@@ -124,10 +123,10 @@ const prepareStringTriangles = (text: string) => {
     const { metadata } = font;
     const { x, y, width, height } = (metadata as any)[text[i]];
     const shape = boundingBoxToTriangles(
-      (x * pixelRatio) / maxWidth,
-      (y * pixelRatio) / maxHeight,
-      (width * pixelRatio) / maxWidth,
-      (height * pixelRatio) / maxHeight,
+      (x * 2) / maxWidth,
+      (y * 2) / maxHeight,
+      (width * 2) / maxWidth,
+      (height * 2) / maxHeight,
     );
     uvs.push(...shape);
   }
@@ -181,69 +180,3 @@ export const loadBuffers = async (gl: WebGLRenderingContext, text: string) => {
     vertices,
   };
 };
-
-const drawText = async (text: string) => {
-  const width = 300;
-  const height = 64;
-  const pixelRatio = window.devicePixelRatio;
-
-  const canvas = document.createElement('canvas');
-  canvas.setAttribute(
-    'style',
-    `width:${width}px;height:${height}px;position:absolute;top:100px;left:100px;`,
-  );
-  canvas.width = width * pixelRatio;
-  canvas.height = height * pixelRatio;
-  document.body.appendChild(canvas);
-
-  const gl = canvas.getContext('webgl');
-  if (gl === null) {
-    throw new Error('Failed to setup GL context');
-  }
-
-  gl.clearColor(0, 0, 0, 0);
-  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
-  gl.enable(gl.BLEND);
-
-  const { positionBuffer, textureBuffer, vertices } = await loadBuffers(
-    gl,
-    text,
-  );
-
-  const projectionMatrix = projection(width, height, 1);
-
-  const {
-    program,
-    positionLocation,
-    texcoordLocation,
-    matrixUniform,
-    colorUniform,
-    bufferUniform,
-    gammaUniform,
-  } = setupTextRendering(gl);
-
-  resize(gl);
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.useProgram(program);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.enableVertexAttribArray(positionLocation);
-  gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
-  gl.enableVertexAttribArray(texcoordLocation);
-  gl.vertexAttribPointer(texcoordLocation, 2, gl.FLOAT, false, 0, 0);
-
-  const sc = fontSize * pixelRatio;
-  const g = (2 * 1.4142) / sc;
-
-  gl.uniformMatrix4fv(matrixUniform, false, projectionMatrix);
-  gl.uniform4fv(colorUniform, [0, 0, 0, 1]);
-  gl.uniform1f(bufferUniform, 0.75);
-  gl.uniform1f(gammaUniform, g);
-
-  gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
-};
-
-export default drawText;

@@ -1,9 +1,9 @@
-import font from '../out/spacing.json';
+﻿import font from '../out/spacing.json';
 import edt from './edt';
 import pack from './pack';
 
 const alphabet =
-  '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+  ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\u0105\u0107ęłńóśźżĄĆĘŁŃÓŚŹŻ';
 
 const INF = 1e20;
 
@@ -29,20 +29,25 @@ type Config = {
   font: Dictionary<Glyph>;
   fontSize: number;
   unitsPerEm: number;
+  buffer: number;
+  radius: number;
+  cutoff: number;
 };
 
 const generateTexture = (config: Config) => {
-  const { font, fontSize, unitsPerEm } = config;
-
-  const buffer = fontSize / 8;
-  const radius = fontSize / 3;
-  const cutoff = 0.25;
+  const { font, fontSize, unitsPerEm, buffer, radius, cutoff } = config;
 
   const scale = (1 / unitsPerEm) * fontSize;
 
   const transform = (x: number) => Math.ceil(x * scale);
 
-  const boxes = alphabet.split('').map(letter => {
+  const boxes = alphabet.split('').sort((a, b) => a - b).map(letter => {
+    const character = (font as any)[letter];
+    if (character === undefined) {
+      throw new Error(
+        `Spacing file doesn't contain information about '${letter}'`,
+      );
+    }
     const { width, height } = (font as any)[letter];
     return {
       letter,
@@ -139,19 +144,22 @@ const generateTexture = (config: Config) => {
   // For display purposes.
   context.putImageData(new ImageData(data, w, h), 0, 0);
 
-  return { width: w, height: h, data, metadata };
+  return { width: w, height: h, data, fontSize, unitsPerEm, buffer, metadata };
 };
 
 const run = async () => {
   const config = {
     font,
-    fontSize: 48,
+    fontSize: 24,
+    buffer: 5,
     unitsPerEm: 2816,
+    radius: 16,
+    cutoff: 0.25,
   };
 
-  const { width, height, metadata } = generateTexture(config);
+  const { data, ...rest } = generateTexture(config);
 
-  console.log(JSON.stringify({ width, height, metadata }));
+  console.log(JSON.stringify(rest));
 };
 
 run();

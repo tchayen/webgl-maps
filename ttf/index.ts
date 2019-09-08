@@ -4,7 +4,7 @@ import binaryFile from './binaryFile';
 import { Ttf, Dictionary, Glyph } from './types';
 
 const alphabet =
-  ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+  ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ąćęłńóśźżĄĆĘŁŃÓŚŹŻ';
 
 const readFile = (fileName: string): Promise<Buffer> =>
   new Promise((resolve, reject) => {
